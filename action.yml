@@ -1,0 +1,40 @@
+name: Set up Sorus
+description: Install the Sorus client, checked against its release's SHA256SUMS and signed provenance, and put sorus and cargo sorus on PATH.
+author: Lorena Labs Ltd
+branding:
+  icon: terminal
+  color: green
+
+inputs:
+  version:
+    description: The client version to install, three numbers such as 0.3.0, or latest.
+    required: false
+    default: latest
+  sha256:
+    description: The sha256 the file for this runner must have. Optional; when given, any other file is refused even if SHA256SUMS names it.
+    required: false
+    default: ''
+  verify-attestation:
+    description: Check the file's signed provenance attestation with gh, which GitHub-hosted runners carry. false checks SHA256SUMS alone.
+    required: false
+    default: 'true'
+
+outputs:
+  version:
+    description: The version installed.
+    value: ${{ steps.install.outputs.version }}
+  directory:
+    description: The directory that holds sorus and cargo-sorus, added to PATH.
+    value: ${{ steps.install.outputs.directory }}
+
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        SORUS_VERSION: ${{ inputs.version }}
+        SORUS_SHA256: ${{ inputs.sha256 }}
+        SORUS_VERIFY_ATTESTATION: ${{ inputs.verify-attestation }}
+        GH_TOKEN: ${{ github.token }}
+      run: bash "$GITHUB_ACTION_PATH/setup.sh"
